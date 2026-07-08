@@ -1,0 +1,15 @@
+node_modules/
+android/
+android-sdk/
+jdk17/
+jdk17.zip
+output/
+*.apk
+build-apk.ps1
+deploy-vercel.ps1
+scripts/
+canteen_all_roles.html
+.expo/
+android/.gradle/
+android/app/build/
+android/build/

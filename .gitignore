@@ -1,0 +1,33 @@
+# Dependencies
+node_modules/
+
+# Android SDK & JDK
+android-sdk/
+jdk17/
+
+# Expo
+.expo/
+
+# Vercel
+.vercel/
+
+# Build output
+dist/
+output/
+build/
+
+# Android local configuration
+android/local.properties
+
+# APK files
+*.apk
+
+# Logs
+*.log
+
+# IDE files
+.vscode/
+.idea/
+
+# macOS
+.DS_Store

@@ -1,0 +1,31 @@
+{
+  "expo": {
+    "name": "STQC Canteen",
+    "slug": "stqc-canteen",
+    "version": "1.0.1",
+    "orientation": "default",
+    "userInterfaceStyle": "automatic",
+    "web": {
+      "bundler": "metro",
+      "output": "single"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "android": {
+      "package": "com.stqc.canteen",
+      "versionCode": 2,
+      "versionName": "1.0.1",
+      "adaptiveIcon": {
+        "backgroundColor": "#1A3A2A"
+      }
+    },
+    "scheme": "stqc-canteen",
+    "extra": {
+      "eas": {
+        "projectId": "5c670222-088c-4dd6-9516-d36996dcc8d5"
+      }
+    },
+    "owner": "kiran_007i"
+  }
+}

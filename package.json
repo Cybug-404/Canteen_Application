@@ -1,0 +1,34 @@
+{
+  "name": "canteen-app",
+  "version": "1.0.0",
+  "description": "",
+  "main": "node_modules/expo/AppEntry.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "expo start",
+    "android": "expo run:android",
+    "android:export": "expo export --platform android",
+    "android:apk": "powershell -ExecutionPolicy Bypass -File scripts/build-android.ps1",
+    "android:install": "powershell -ExecutionPolicy Bypass -File scripts/build-android.ps1 -RunOnDevice",
+    "web": "expo start --web",
+    "build": "expo export --platform web",
+    "vercel-build": "expo export --platform web"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "private": true,
+  "dependencies": {
+    "expo": "^55.0.15",
+    "react": "19.2.0",
+    "react-dom": "19.2.0",
+    "react-native": "0.83.4",
+    "react-native-web": "^0.21.0"
+  },
+  "devDependencies": {
+    "babel-preset-expo": "^55.0.22",
+    "eas-cli": "^18.7.0",
+    "vercel": "^54.2.0"
+  }
+}

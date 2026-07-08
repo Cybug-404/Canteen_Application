@@ -1,0 +1,6 @@
+# Copy this file to local.properties and set your Android SDK path.
+# Windows example (uncomment and fix path):
+sdk.dir=C\:\\Users\\Acer\\AppData\\Local\\Android\\Sdk
+
+# macOS example:
+# sdk.dir=/Users/you/Library/Android/sdk
