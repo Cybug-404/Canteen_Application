@@ -357,94 +357,164 @@ export function ChefKitchenStock({
   );
 }
 
+function ManageCard({ title, val, sub, icon, theme, onPress, valColor, colors }) {
+  return (
+    <TouchableOpacity
+      activeOpacity={0.7}
+      onPress={onPress}
+      style={{
+        backgroundColor: colors.cb,
+        borderRadius: 16,
+        borderWidth: 1.5,
+        borderColor: colors.bd,
+        padding: 14,
+        flex: 1,
+        minWidth: "45%",
+        position: "relative",
+      }}
+    >
+      <Text style={{ position: "absolute", top: 12, right: 14, color: colors.ts, fontSize: 14 }}>›</Text>
+      <View style={{ alignSelf: "flex-start", marginBottom: 12 }}>
+        <ColoredIcon name={icon} colorTheme={theme} size={18} />
+      </View>
+      <Text style={{ color: colors.ts, fontSize: 13, fontWeight: "500" }}>{title}</Text>
+      <Text style={{ color: valColor, fontSize: 18, fontWeight: "bold", marginVertical: 4 }}>{val}</Text>
+      <Text style={{ color: colors.ts, fontSize: 11 }}>{sub}</Text>
+    </TouchableOpacity>
+  );
+}
+
 export function AdminHome({ styles, goTo, pendingCount, onOpenDrawer }) {
   const { colors } = useTheme();
-  
-  const stats = [
-    { label: "Today's Income", val: "₹14,250", icon: "income", theme: "green" },
-    { label: "Today's Bookings", val: "153", icon: "booking", theme: "blue" },
-    { label: "Pending Recharge", val: String(pendingCount), icon: "wallet", theme: "orange" },
-    { label: "Total Users", val: "245", icon: "profile", theme: "purple" },
-  ];
 
-  const bookingsToday = [
-    { name: "Lunch", icon: "🍛", count: 45 },
-    { name: "Tea", icon: "☕", count: 63 },
-    { name: "Snacks", icon: "🥟", count: 27 },
-    { name: "Egg", icon: "🥚", count: 18 },
+  const categories = [
+    { name: "Lunch", icon: "🍛", val: "1,800", percentage: 57, dotColor: "#D97706", barColor: "#D97706" },
+    { name: "Tea", icon: "☕", val: "600", percentage: 19, dotColor: "#1D4ED8", barColor: "#1D4ED8" },
+    { name: "Snacks", icon: "🥟", val: "480", percentage: 15, dotColor: "#F59E0B", barColor: "#F59E0B" },
+    { name: "Egg", icon: "🥚", val: "270", percentage: 9, dotColor: "#10B981", barColor: "#10B981" },
   ];
 
   return (
     <PageLayout
       header={
-        <View style={styles.waveHeader}>
-          <View style={styles.headerTopRow}>
-            <TouchableOpacity style={styles.iconBtn} onPress={onOpenDrawer}>
+        <View style={{ backgroundColor: colors.gd, borderBottomLeftRadius: 28, borderBottomRightRadius: 28, padding: 18, paddingTop: 14 }}>
+          <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+            <TouchableOpacity onPress={onOpenDrawer} style={{ padding: 4 }}>
               <CustomIcon name="menu" size={20} color="#fff" />
             </TouchableOpacity>
-            <Text style={styles.topTitle}>Admin Dashboard</Text>
-            <TouchableOpacity style={styles.iconBtn}>
-              <View style={{ position: "relative" }}>
-                <CustomIcon name="bell" size={20} color="#fff" />
-                <View style={{ position: "absolute", top: -4, right: -4, backgroundColor: colors.rd, width: 14, height: 14, borderRadius: 7, alignItems: "center", justifyContent: "center" }}>
-                  <Text style={{ color: "#fff", fontSize: 9, fontWeight: "500" }}>5</Text>
-                </View>
-              </View>
+            <TouchableOpacity style={{ padding: 4 }}>
+              <CustomIcon name="bell" size={20} color="#fff" />
             </TouchableOpacity>
           </View>
-          <Text style={styles.headerGreeting}>Good Evening, Admin 👋</Text>
-          <View style={{ flexDirection: "row", gap: 8, marginTop: 8 }}>
-            <View style={{ backgroundColor: "rgba(255,255,255,0.2)", borderRadius: 6, paddingHorizontal: 8, paddingVertical: 4 }}>
-              <Text style={{ color: "#fff", fontSize: 10, fontWeight: "500" }}>🔐 Administrator</Text>
+          <Text style={{ color: "#fff", fontSize: 20, fontWeight: "bold" }}>Good Afternoon, Admin 👋</Text>
+          <Text style={{ color: "rgba(255,255,255,0.75)", fontSize: 13, marginTop: 4 }}>Thursday, 9 July 2026</Text>
+          <View style={{ flexDirection: "row", gap: 8, marginTop: 10 }}>
+            <View style={{ backgroundColor: "rgba(255,255,255,0.2)", borderRadius: 6, paddingHorizontal: 10, paddingVertical: 4 }}>
+              <Text style={{ color: "#fff", fontSize: 11, fontWeight: "500" }}>🔐 Administrator</Text>
             </View>
-            <View style={{ backgroundColor: "rgba(255,255,255,0.2)", borderRadius: 6, paddingHorizontal: 8, paddingVertical: 4 }}>
-              <Text style={{ color: "#fff", fontSize: 10, fontWeight: "500" }}>STQC Canteen</Text>
+            <View style={{ backgroundColor: "rgba(255,255,255,0.2)", borderRadius: 6, paddingHorizontal: 10, paddingVertical: 4 }}>
+              <Text style={{ color: "#fff", fontSize: 11, fontWeight: "500" }}>STQC Canteen</Text>
             </View>
           </View>
+          <TouchableOpacity
+            activeOpacity={0.8}
+            onPress={() => goTo("adm-recharge")}
+            style={{
+              flexDirection: "row",
+              justifyContent: "space-between",
+              alignItems: "center",
+              backgroundColor: "rgba(255,255,255,0.15)",
+              borderRadius: 14,
+              padding: 14,
+              marginTop: 16,
+            }}
+          >
+            <Text style={{ color: "#fff", fontSize: 14, fontWeight: "500" }}>Pending Recharges</Text>
+            <Text style={{ color: "#fff", fontSize: 24, fontWeight: "bold" }}>{pendingCount}</Text>
+          </TouchableOpacity>
         </View>
       }
       footer={<AdminBottomNav active="adm-home" goTo={goTo} styles={styles} />}
     >
-      <View style={[styles.grid2, { paddingHorizontal: 4 }]}>
-        {stats.map((s, idx) => (
-          <View key={idx} style={[styles.statCardGrid, { flex: 1, minWidth: "45%" }]}>
-            <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
-              <Text style={styles.statGridLbl}>{s.label}</Text>
-              <ColoredIcon name={s.icon} colorTheme={s.theme} size={16} />
+      <Text style={[styles.sectionLabel, { marginTop: 16, marginBottom: 12, paddingHorizontal: 4 }]}>Manage</Text>
+      <View style={{ gap: 10, paddingHorizontal: 4 }}>
+        <View style={{ flexDirection: "row", gap: 10 }}>
+          <ManageCard
+            title="Recharge"
+            val="₹ 4,200"
+            sub="This month"
+            icon="wallet"
+            theme="amber"
+            valColor="#D97706"
+            onPress={() => goTo("adm-recharge")}
+            colors={colors}
+          />
+          <ManageCard
+            title="Expenditure"
+            val="₹ 3,150"
+            sub="This month"
+            icon="expenditure"
+            theme="red"
+            valColor="#DC2626"
+            onPress={() => goTo("adm-expenditure")}
+            colors={colors}
+          />
+        </View>
+        <View style={{ flexDirection: "row", gap: 10 }}>
+          <ManageCard
+            title="Income"
+            val="₹ 5,800"
+            sub="This month"
+            icon="income_chart"
+            theme="green"
+            valColor="#168A3A"
+            onPress={() => goTo("adm-income")}
+            colors={colors}
+          />
+          <ManageCard
+            title="Balance"
+            val="₹ 2,650"
+            sub="Net this month"
+            icon="scales"
+            theme="purple"
+            valColor="#7C3AED"
+            onPress={() => goTo("adm-balance")}
+            colors={colors}
+          />
+        </View>
+      </View>
+
+      <View style={{
+        backgroundColor: colors.cb,
+        borderRadius: 18,
+        borderWidth: 1.5,
+        borderColor: colors.bd,
+        padding: 16,
+        marginTop: 20,
+        marginHorizontal: 4,
+        marginBottom: 10,
+      }}>
+        <Text style={{ color: colors.tp, fontSize: 15, fontWeight: "bold", marginBottom: 16 }}>📊 Monthly Expenses by Category</Text>
+        {categories.map((c) => (
+          <View key={c.name} style={{ marginBottom: 12 }}>
+            <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+                <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: c.dotColor }} />
+                <Text style={{ fontSize: 18 }}>{c.icon}</Text>
+                <Text style={{ color: colors.tp, fontSize: 13, fontWeight: "500" }}>{c.name}</Text>
+              </View>
+              <Text style={{ color: colors.tp, fontSize: 14, fontWeight: "600" }}>₹ {c.val}</Text>
             </View>
-            <Text style={styles.statGridVal}>{s.val}</Text>
+            <View style={{ height: 6, backgroundColor: colors.bd, borderRadius: 3, overflow: "hidden" }}>
+              <View style={{ height: "100%", width: `${c.percentage}%`, backgroundColor: c.barColor, borderRadius: 3 }} />
+            </View>
           </View>
         ))}
-      </View>
-
-      <Text style={[styles.sectionLabel, { marginTop: 16, marginBottom: 8, paddingHorizontal: 4 }]}>Bookings Today</Text>
-      <View style={{ gap: 8, paddingHorizontal: 4 }}>
-        {bookingsToday.map((b) => (
-          <TouchableOpacity
-            key={b.name}
-            style={styles.couponCard}
-            onPress={() => goTo("adm-recharge")}
-          >
-            <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
-              <View style={{ width: 40, height: 40, borderRadius: 10, backgroundColor: colors.gl, alignItems: 'center', justifyContent: 'center' }}>
-                <Text style={{ fontSize: 22 }}>{b.icon}</Text>
-              </View>
-              <Text style={styles.cardName}>{b.name}</Text>
-            </View>
-            <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
-              <Text style={{ color: colors.tp, fontWeight: "600", fontSize: 15 }}>{b.count}</Text>
-              <CustomIcon name="chevron" size={16} color={colors.ts} />
-            </View>
-          </TouchableOpacity>
-        ))}
-      </View>
-
-      <Text style={[styles.sectionLabel, { marginTop: 20, marginBottom: 8, paddingHorizontal: 4 }]}>More Actions</Text>
-      <View style={{ gap: 4, paddingHorizontal: 4 }}>
-        <ProfileRow iconName="wallet" colorTheme="amber" label={`Recharge Requests (${pendingCount} pending)`} onPress={() => goTo("adm-recharge")} styles={styles} />
-        <ProfileRow iconName="chart" colorTheme="red" label="Expenditure Details" onPress={() => goTo("adm-expenditure")} styles={styles} />
-        <ProfileRow iconName="income" colorTheme="green" label="Income History" onPress={() => goTo("adm-income")} styles={styles} />
-        <ProfileRow iconName="balance" colorTheme="blue" label="Balance Sheet" onPress={() => goTo("adm-balance")} styles={styles} />
+        <View style={{ height: 1.5, backgroundColor: colors.bd, marginVertical: 12 }} />
+        <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
+          <Text style={{ color: colors.ts, fontSize: 14, fontWeight: "500" }}>Total</Text>
+          <Text style={{ color: "#EF4444", fontSize: 16, fontWeight: "bold" }}>₹ 3,150</Text>
+        </View>
       </View>
     </PageLayout>
   );
@@ -460,6 +530,7 @@ export function AdminRechargeList({
   onReject,
 }) {
   const { colors } = useTheme();
+  const [expandedId, setExpandedId] = React.useState(null);
   const list =
     filter === "all" ? requests : requests.filter((r) => r.status === filter);
   return (
@@ -484,9 +555,14 @@ export function AdminRechargeList({
         ) : (
           list.map((r) => {
             const idx = requests.indexOf(r);
+            const isExpanded = expandedId === r.id;
             return (
-              <View key={r.id} style={styles.couponCard}>
-                <View style={{ flexDirection: "row", gap: 10, marginBottom: 8, alignItems: "center", width: "100%" }}>
+              <View key={r.id} style={[styles.couponCard, { flexDirection: "column", alignItems: "stretch" }]}>
+                <TouchableOpacity
+                  activeOpacity={0.7}
+                  onPress={() => setExpandedId(isExpanded ? null : r.id)}
+                  style={{ flexDirection: "row", gap: 10, alignItems: "center", width: "100%" }}
+                >
                   <View style={{ width: 36, height: 36, borderRadius: 18, backgroundColor: colors.gl, alignItems: 'center', justifyContent: 'center' }}>
                     <Text style={{ fontSize: 18 }}>{r.avatar}</Text>
                   </View>
@@ -494,35 +570,43 @@ export function AdminRechargeList({
                     <Text style={styles.cardName}>{r.user}</Text>
                     <Text style={styles.cardPrice}>{r.email}</Text>
                   </View>
-                  <Text style={[styles.cardName, { color: colors.gd }]}>₹{r.amount}</Text>
-                </View>
-                <Text style={styles.cardPrice}>ID: {r.id} • {r.mode} • {r.date}</Text>
-                <Text style={styles.cardPrice}>UTR: {r.utr}</Text>
-                {r.status === "Pending" ? (
-                  <View style={{ flexDirection: "row", gap: 8, marginTop: 8 }}>
-                    <TouchableOpacity
-                      style={[styles.primaryBtn, { flex: 1, backgroundColor: colors.gm, paddingVertical: 8 }]}
-                      onPress={() => onApprove(idx)}
-                    >
-                      <Text style={styles.primaryBtnText}>Approve</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                      style={[styles.outlineBtn, { flex: 1, borderColor: colors.rd, paddingVertical: 8 }]}
-                      onPress={() => onReject(idx)}
-                    >
-                      <Text style={[styles.outlineBtnText, { color: colors.rd }]}>Reject</Text>
-                    </TouchableOpacity>
+                  <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+                    <Text style={[styles.cardName, { color: colors.gd }]}>₹{r.amount}</Text>
+                    <Text style={{ fontSize: 12, color: colors.ts }}>{isExpanded ? "▲" : "▼"}</Text>
                   </View>
-                ) : (
-                  <Text
-                    style={{
-                      marginTop: 6,
-                      fontWeight: "500",
-                      color: r.status === "Approved" ? colors.gm : colors.rd,
-                    }}
-                  >
-                    {r.status}
-                  </Text>
+                </TouchableOpacity>
+
+                {isExpanded && (
+                  <View style={{ marginTop: 8, borderTopWidth: 1, borderTopColor: colors.bd, paddingTop: 8 }}>
+                    <Text style={[styles.cardPrice, { marginBottom: 2 }]}>ID: {r.id} • {r.mode} • {r.date}</Text>
+                    <Text style={[styles.cardPrice, { marginBottom: 4 }]}>UTR: {r.utr}</Text>
+                    {r.status === "Pending" ? (
+                      <View style={{ flexDirection: "row", gap: 8, marginTop: 6 }}>
+                        <TouchableOpacity
+                          style={[styles.primaryBtn, { flex: 1, backgroundColor: colors.gm, paddingVertical: 8 }]}
+                          onPress={() => onApprove(idx)}
+                        >
+                          <Text style={styles.primaryBtnText}>Approve</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                          style={[styles.outlineBtn, { flex: 1, borderColor: colors.rd, paddingVertical: 8 }]}
+                          onPress={() => onReject(idx)}
+                        >
+                          <Text style={[styles.outlineBtnText, { color: colors.rd }]}>Reject</Text>
+                        </TouchableOpacity>
+                      </View>
+                    ) : (
+                      <Text
+                        style={{
+                          marginTop: 6,
+                          fontWeight: "500",
+                          color: r.status === "Approved" ? colors.gm : colors.rd,
+                        }}
+                      >
+                        {r.status}
+                      </Text>
+                    )}
+                  </View>
                 )}
               </View>
             );
@@ -693,7 +777,7 @@ export function ProfileRow({ icon, iconName, colorTheme = "grey", label, onPress
         <Text style={[styles.profileIcon, danger && { backgroundColor: "#FEE2E2" }]}>{icon}</Text>
       )}
       <Text style={[styles.profileText, danger && { color: colors.rd, fontWeight: "500" }]}>{label}</Text>
-      <Text style={{ marginLeft: "auto", color: colors.ts, fontSize: 18 }}>:</Text>
+      <Text style={{ marginLeft: "auto", color: colors.ts, fontSize: 18 }}>›</Text>
     </TouchableOpacity>
   );
 }
@@ -768,10 +852,10 @@ export function ChefHistoryView({ styles, goTo, entries, filter, setFilter }) {
 export function AdminBottomNav({ active, goTo, styles }) {
   const { colors } = useTheme();
   const tabs = [
-    { key: "adm-home", label: "Dashboard", icon: "home" },
-    { key: "adm-recharge", label: "Bookings", icon: "booking" },
-    { key: "adm-inventory", label: "Coupons", icon: "coupons" },
-    { key: "adm-profile", label: "More", icon: "profile" }
+    { key: "adm-home", label: "Home", icon: "home" },
+    { key: "adm-recharge", label: "Recharge", icon: "wallet" },
+    { key: "adm-balance", label: "Finance", icon: "scales" },
+    { key: "adm-profile", label: "Profile", icon: "profile" }
   ];
 
   return (

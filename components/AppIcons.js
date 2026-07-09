@@ -26,7 +26,10 @@ const ICONS = {
   clock: "time-outline",
   food: "fast-food-outline",
   phone: "call-outline",
-  mail: "mail-outline",
+  expenditure: "trending-down-outline",
+  income_chart: "trending-up-outline",
+  scales: "scale-outline",
+  exit: "exit-outline",
 };
 
 export function CustomIcon({ name, size = 20, color = "#6B7280", style }) {

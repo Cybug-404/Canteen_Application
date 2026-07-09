@@ -1608,27 +1608,165 @@ function AppContent() {
         </View>
       )}
       {screen === "adm-balance" && (
-        <View style={styles.page}>
-          {renderTopBar("Balance", () => goTo("adm-home"))}
-          <ScrollView contentContainerStyle={styles.scroll}>
-            <View style={styles.greetingCard}>
-              <Text style={styles.walletLbl}>Net Balance</Text>
-              <Text style={{ color: "#fff", fontSize: 28, fontWeight: "600" }}> 12,450</Text>
-              <Text style={styles.greetSub}>Income ? Expenditure (May 2026)</Text>
+        <PageLayout
+          header={
+            <View style={[styles.topBar, { backgroundColor: colors.gd, paddingVertical: 14 }]}>
+              <TouchableOpacity style={styles.iconBtn} onPress={() => goTo("adm-home")}>
+                <CustomIcon name="chevron" size={20} color="#fff" />
+              </TouchableOpacity>
+              <View style={{ flex: 1, marginLeft: 12 }}>
+                <Text style={[styles.topTitle, { fontSize: 18, color: "#fff" }]}>Balance</Text>
+                <Text style={{ color: "rgba(255,255,255,0.7)", fontSize: 11 }}>Income vs Expenditure</Text>
+              </View>
             </View>
-            <CRow label="Total Income" value=" 18,450" />
-            <CRow label="Total Expenditure" value=" 6,000" />
-          </ScrollView>
-        </View>
+          }
+          footer={<AdminBottomNav active="adm-balance" goTo={goTo} styles={styles} />}
+        >
+          <View style={{ paddingHorizontal: 4, gap: 14 }}>
+            {/* Top Net Balance Card */}
+            <View style={{ backgroundColor: colors.gd, borderRadius: 20, padding: 18, marginVertical: 4 }}>
+              <Text style={{ color: "rgba(255,255,255,0.8)", fontSize: 13, fontWeight: "500" }}>Net Balance — May 2026</Text>
+              <Text style={{ color: "#fff", fontSize: 32, fontWeight: "bold", marginVertical: 8 }}>₹ 2,650</Text>
+              <Text style={{ color: "rgba(255,255,255,0.7)", fontSize: 12 }}>Income ₹5,800 − Expenditure ₹3,150</Text>
+            </View>
+
+            {/* Summary Card */}
+            <View style={{ backgroundColor: colors.cb, borderRadius: 18, borderWidth: 1.5, borderColor: colors.bd, padding: 16 }}>
+              <Text style={{ color: colors.tp, fontSize: 15, fontWeight: "bold", marginBottom: 16 }}>Summary</Text>
+              
+              <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+                  <ColoredIcon name="income_chart" colorTheme="blue" size={16} />
+                  <Text style={{ color: colors.tp, fontSize: 13, fontWeight: "500" }}>Total Income</Text>
+                </View>
+                <Text style={{ color: "#168A3A", fontSize: 14, fontWeight: "bold" }}>₹ 5,800</Text>
+              </View>
+              
+              <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+                  <ColoredIcon name="expenditure" colorTheme="red" size={16} />
+                  <Text style={{ color: colors.tp, fontSize: 13, fontWeight: "500" }}>Total Expenditure</Text>
+                </View>
+                <Text style={{ color: "#DC2626", fontSize: 14, fontWeight: "bold" }}>₹ 3,150</Text>
+              </View>
+              
+              <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+                  <ColoredIcon name="wallet" colorTheme="blue" size={16} />
+                  <Text style={{ color: colors.tp, fontSize: 13, fontWeight: "500" }}>Pending Recharges</Text>
+                </View>
+                <Text style={{ color: "#D97706", fontSize: 14, fontWeight: "bold" }}>₹ 950</Text>
+              </View>
+              
+              <View style={{ height: 1, backgroundColor: colors.bd, marginVertical: 8 }} />
+              
+              <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginTop: 4 }}>
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+                  <ColoredIcon name="scales" colorTheme="amber" size={16} />
+                  <Text style={{ color: colors.tp, fontSize: 13, fontWeight: "bold" }}>Net Balance</Text>
+                </View>
+                <Text style={{ color: "#7C3AED", fontSize: 14, fontWeight: "bold" }}>₹ 2,650</Text>
+              </View>
+            </View>
+
+            {/* Income vs Expenditure Visual Bars */}
+            <View style={{ backgroundColor: colors.cb, borderRadius: 18, borderWidth: 1.5, borderColor: colors.bd, padding: 16 }}>
+              <Text style={{ color: colors.tp, fontSize: 15, fontWeight: "bold", marginBottom: 16 }}>Income vs Expenditure</Text>
+              
+              <View style={{ marginBottom: 12 }}>
+                <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
+                  <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+                    <CustomIcon name="income_chart" size={16} color="#168A3A" />
+                    <Text style={{ color: colors.ts, fontSize: 12, fontWeight: "500" }}>Income</Text>
+                  </View>
+                  <Text style={{ color: "#168A3A", fontSize: 13, fontWeight: "600" }}>₹ 5,800</Text>
+                </View>
+                <View style={{ height: 6, backgroundColor: colors.bd, borderRadius: 3, overflow: "hidden" }}>
+                  <View style={{ height: "100%", width: "100%", backgroundColor: "#168A3A", borderRadius: 3 }} />
+                </View>
+              </View>
+
+              <View style={{ marginBottom: 12 }}>
+                <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
+                  <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+                    <CustomIcon name="expenditure" size={16} color="#DC2626" />
+                    <Text style={{ color: colors.ts, fontSize: 12, fontWeight: "500" }}>Expenditure</Text>
+                  </View>
+                  <Text style={{ color: "#DC2626", fontSize: 13, fontWeight: "600" }}>₹ 3,150</Text>
+                </View>
+                <View style={{ height: 6, backgroundColor: colors.bd, borderRadius: 3, overflow: "hidden" }}>
+                  <View style={{ height: "100%", width: "54%", backgroundColor: "#DC2626", borderRadius: 3 }} />
+                </View>
+              </View>
+
+              <View style={{ marginBottom: 4 }}>
+                <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
+                  <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+                    <CustomIcon name="scales" size={16} color="#7C3AED" />
+                    <Text style={{ color: colors.ts, fontSize: 12, fontWeight: "500" }}>Balance</Text>
+                  </View>
+                  <Text style={{ color: "#7C3AED", fontSize: 13, fontWeight: "600" }}>₹ 2,650</Text>
+                </View>
+                <View style={{ height: 6, backgroundColor: colors.bd, borderRadius: 3, overflow: "hidden" }}>
+                  <View style={{ height: "100%", width: "46%", backgroundColor: "#7C3AED", borderRadius: 3 }} />
+                </View>
+              </View>
+            </View>
+
+            {/* Month-wise Summary Table */}
+            <View style={{ backgroundColor: colors.cb, borderRadius: 18, borderWidth: 1.5, borderColor: colors.bd, padding: 16, marginBottom: 12 }}>
+              <Text style={{ color: colors.tp, fontSize: 15, fontWeight: "bold", marginBottom: 16 }}>Month-wise Summary</Text>
+              
+              <View style={{ flexDirection: "row", borderBottomWidth: 1, borderBottomColor: colors.bd, paddingBottom: 8, marginBottom: 8 }}>
+                <Text style={{ flex: 1, color: colors.ts, fontSize: 11, fontWeight: "600" }}>Month</Text>
+                <Text style={{ width: 70, color: colors.ts, fontSize: 11, fontWeight: "600", textAlign: "right" }}>Income</Text>
+                <Text style={{ width: 70, color: colors.ts, fontSize: 11, fontWeight: "600", textAlign: "right" }}>Expense</Text>
+                <Text style={{ width: 70, color: colors.ts, fontSize: 11, fontWeight: "600", textAlign: "right" }}>Balance</Text>
+              </View>
+
+              {[
+                { month: "May 26", inc: "₹5,800", exp: "₹3,150", bal: "₹2,650" },
+                { month: "Apr 26", inc: "₹6,200", exp: "₹3,400", bal: "₹2,800" },
+                { month: "Mar 26", inc: "₹5,400", exp: "₹3,050", bal: "₹2,350" },
+                { month: "Feb 26", inc: "₹5,900", exp: "₹3,300", bal: "₹2,600" },
+              ].map((row, idx) => (
+                <View key={idx} style={{ flexDirection: "row", paddingVertical: 8, borderBottomWidth: idx === 3 ? 0 : 1, borderBottomColor: colors.bd + "40" }}>
+                  <Text style={{ flex: 1, color: colors.tp, fontSize: 12, fontWeight: "500" }}>{row.month}</Text>
+                  <Text style={{ width: 70, color: "#168A3A", fontSize: 12, fontWeight: "600", textAlign: "right" }}>{row.inc}</Text>
+                  <Text style={{ width: 70, color: "#DC2626", fontSize: 12, fontWeight: "600", textAlign: "right" }}>{row.exp}</Text>
+                  <Text style={{ width: 70, color: "#7C3AED", fontSize: 12, fontWeight: "600", textAlign: "right" }}>{row.bal}</Text>
+                </View>
+              ))}
+            </View>
+          </View>
+        </PageLayout>
       )}
       {screen === "adm-profile" && (
         <PageLayout
-          header={renderTopBar("Admin Profile", () => goTo("adm-home"))}
+          header={
+            <View style={{ backgroundColor: colors.gd, alignItems: "center", paddingVertical: 28, paddingTop: 36, borderBottomLeftRadius: 0, borderBottomRightRadius: 0 }}>
+              <View style={{ width: 76, height: 76, borderRadius: 38, backgroundColor: "#F59E0B", alignItems: "center", justifyContent: "center", marginBottom: 12 }}>
+                <CustomIcon name="profile" size={38} color="#2E1065" />
+              </View>
+              <Text style={{ color: "#fff", fontSize: 22, fontWeight: "bold" }}>Admin</Text>
+              <Text style={{ color: "rgba(255,255,255,0.75)", fontSize: 13, marginTop: 4 }}>Administrator · STQC</Text>
+              <View style={{ backgroundColor: "#F59E0B", borderRadius: 14, paddingHorizontal: 12, paddingVertical: 5, marginTop: 10, flexDirection: "row", alignItems: "center", gap: 4 }}>
+                <Text style={{ color: "#fff", fontSize: 12, fontWeight: "600" }}>🔐 Admin Access</Text>
+              </View>
+            </View>
+          }
           footer={<AdminBottomNav active="adm-profile" goTo={goTo} styles={styles} />}
         >
-          <View style={{ gap: 10, paddingHorizontal: 4 }}>
-            <Text style={styles.subtle}>admin@stqc.gov.in</Text>
-            <ProfileRow iconName="logout" colorTheme="red" label="Logout" onPress={logout} danger />
+          <View style={{ gap: 4, paddingHorizontal: 4, marginTop: 8 }}>
+            <ProfileRow iconName="home" colorTheme="green" label="Home" onPress={() => goTo("adm-home")} />
+            <ProfileRow iconName="wallet" colorTheme="blue" label="Recharge Requests" onPress={() => goTo("adm-recharge")} />
+            <ProfileRow iconName="expenditure" colorTheme="red" label="Expenditure" onPress={() => goTo("adm-expenditure")} />
+            <ProfileRow iconName="income_chart" colorTheme="blue" label="Income" onPress={() => goTo("adm-income")} />
+            <ProfileRow iconName="scales" colorTheme="amber" label="Balance" onPress={() => goTo("adm-balance")} />
+            
+            <View style={{ height: 1.5, backgroundColor: colors.bd, marginVertical: 12, marginHorizontal: 12 }} />
+            
+            <ProfileRow iconName="exit" colorTheme="red" label="Logout" onPress={logout} danger />
           </View>
         </PageLayout>
       )}
@@ -1907,7 +2045,7 @@ function ProfileRow({ icon, iconName, colorTheme = "grey", label, onPress, dange
         <Text style={[styles.profileIcon, danger && { backgroundColor: "#FEE2E2" }]}>{icon}</Text>
       )}
       <Text style={[styles.profileText, danger && { color: colors.rd, fontWeight: "500" }]}>{label}</Text>
-      <Text style={{ marginLeft: "auto", color: colors.ts, fontSize: 18 }}>:</Text>
+      <Text style={{ marginLeft: "auto", color: colors.ts, fontSize: 18 }}>›</Text>
     </TouchableOpacity>
   );
 }
@@ -1985,6 +2123,7 @@ const createStyles = (colors) => StyleSheet.create({
     fontSize: 15,
     color: colors.tp,
     paddingVertical: 10,
+    minWidth: 0,
   },
   selectedDateCard: {
     flexDirection: "row",
@@ -2380,7 +2519,7 @@ const createStyles = (colors) => StyleSheet.create({
     paddingTop: 7,
   },
   profileText: { color: colors.tp, fontWeight: "500" },
-  row2: { flexDirection: "row", gap: 9 },
+  row2: { flexDirection: "row", gap: 9, width: "100%" },
   amountGrid: { flexDirection: "row", flexWrap: "wrap", gap: 7 },
   modeGrid: { flexDirection: "row", flexWrap: "wrap", gap: 7 },
   amountBtn: {
