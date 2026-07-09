@@ -708,9 +708,10 @@ body{background:#ddd9d2;display:flex;flex-direction:column;align-items:center;pa
       <button class="tab-btn" id="ts" onclick="swTab('signup')">Sign Up</button>
     </div>
     <div class="tf-g" id="fl">
-      <div class="igrp"><label>Email / Mobile *</label><input type="text" id="login-email" value="customer@stqc.gov.in"/></div>
-      <div class="igrp"><label>Password *</label><input type="password" id="login-pass" value="••••••••"/></div>
+      <div class="igrp"><label>Email / Mobile *</label><input type="text" id="login-email" value="customer@stqc.gov.in" oninput="const e=document.getElementById('login-err-msg'); if(e)e.style.display='none';"/></div>
+      <div class="igrp"><label>Password *</label><input type="password" id="login-pass" value="••••••••" oninput="const e=document.getElementById('login-err-msg'); if(e)e.style.display='none';"/></div>
       <div class="forgot"><a onclick="goTo('forgotpw')">Forgot Password?</a></div>
+      <div id="login-err-msg" style="color:var(--rd); font-size:12px; font-weight:600; text-align:center; display:none; margin: 4px 0 8px 0;">⚠️ Invalid credentials</div>
       <button class="btn-p" onclick="doLogin()">Login →</button>
     </div>
     <div class="tf-g" id="fs" style="display:none;">
@@ -2202,15 +2203,20 @@ const PURCHASER_PASS='purchaser123';
 function doLogin(){
   const email=(document.getElementById('login-email').value||'').trim().toLowerCase();
   const pass=(document.getElementById('login-pass').value||'').trim();
+  const errEl = document.getElementById('login-err-msg');
+  if(errEl) errEl.style.display = 'none';
+
   if(email===ADMIN_EMAIL && pass===ADMIN_PASS){
     loginAsAdmin();
   } else if(email===CHEF_EMAIL && pass===CHEF_PASS){
     loginAsChef();
   } else if(email===PURCHASER_EMAIL && pass===PURCHASER_PASS){
     loginAsPurchaser();
-  } else {
+  } else if(email.endsWith('@stqc.gov.in') && pass.length > 0) {
     currentRole='user';
     goTo('home');
+  } else {
+    if(errEl) errEl.style.display = 'block';
   }
 }
 function loginAsPurchaser(){
@@ -2311,7 +2317,7 @@ function renderChefList(){
   if(booked===0){container.innerHTML='';empty.style.display='block';submitWrap.style.display='none';}
   else{
     empty.style.display='none';
-    submitWrap.style.display=(chefCurDay===TODAY_DAY&&!locked)?'block':'none';
+    submitWrap.style.display=(!locked)?'block':'none';
     if(filtered.length===0){
       container.innerHTML=`<div style="text-align:center;padding:20px;font-size:12px;color:var(--ts);">No entries match this filter.</div>`;
     } else {
@@ -2323,7 +2329,7 @@ function renderChefList(){
     }
     if(locked){
       submitWrap.style.display='block';
-      submitWrap.innerHTML=`<div style="background:#D1FAE5;border-radius:11px;padding:10px 13px;font-size:12px;color:var(--gm);font-weight:500;text-align:center;">✅ This list has already been submitted &amp; locked.</div>`;
+      submitWrap.innerHTML=`<div style="background:#D1FAE5;border-radius:11px;padding:10px 13px;font-size:12px;color:var(--gm);font-weight:500;text-align:center;margin-bottom:8px;">✅ This list has already been submitted &amp; locked.</div><button class="btn-p" style="background:var(--am);" onclick="editChefEntry()">✏️ Edit List (Unlock)</button>`;
     }
   }
   updateChefHomeStats();
