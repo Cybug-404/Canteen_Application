@@ -21,6 +21,7 @@
   "private": true,
   "dependencies": {
     "expo": "^55.0.15",
+    "expo-image-picker": "^57.0.2",
     "react": "19.2.0",
     "react-dom": "19.2.0",
     "react-native": "0.83.4",

@@ -6,6 +6,8 @@ import {
   TextInput,
   TouchableOpacity,
   View,
+  Image,
+  Platform,
 } from "react-native";
 import {
   CHEF_NAME,
@@ -112,6 +114,7 @@ export function ChefListView({
   onSubmitList,
   listStats,
   filteredRecs,
+  onUnlockList,
 }) {
   const { colors } = useTheme();
   const { calCellWidth } = useScreenMetrics();
@@ -211,11 +214,13 @@ export function ChefListView({
           })
         )}
         {listStats.locked ? (
-          <View style={[styles.msgBox, { backgroundColor: colors.gl, borderColor: colors.gm }]}>
-            <Text style={{ color: colors.gm, fontWeight: "500" }}>List submitted and locked.</Text>
+          <View style={{ gap: 8 }}>
+            <View style={[styles.msgBox, { backgroundColor: colors.gl, borderColor: colors.gm }]}>
+              <Text style={{ color: colors.gm, fontWeight: "500" }}>List submitted and locked.</Text>
+            </View>
+            <PrimaryBtn title="✏️ Edit List (Unlock)" onPress={onUnlockList} color={colors.am} styles={styles} />
           </View>
         ) : (
-          chefCurDay === TODAY_DAY &&
           listStats.booked > 0 && (
             <PrimaryBtn title="Final Submit List" onPress={onSubmitList} color={colors.gm} styles={styles} />
           )
@@ -291,11 +296,14 @@ export function ChefKitchenStock({
               {["low", "out"].map((s) => (
                 <TouchableOpacity
                   key={s}
-                  style={[styles.amountBtn, ksStatus === s && styles.amountBtnActive]}
+                  style={[
+                    styles.amountBtn,
+                    ksStatus === s && { backgroundColor: s === "low" ? colors.am : colors.rd }
+                  ]}
                   onPress={() => setKsStatus(s)}
                 >
-                  <Text style={[styles.amountBtnText, ksStatus === s && { color: "#fff" }]}>
-                    {s === "low" ? "Low" : "Out"}
+                  <Text style={[styles.amountBtnText, ksStatus === s && { color: "#fff", fontWeight: "bold" }]}>
+                    {s === "low" ? "⚠️ Low Stock" : "🔴 Out of Stock"}
                   </Text>
                 </TouchableOpacity>
               ))}
@@ -334,18 +342,36 @@ export function ChefKitchenStock({
               <Text style={styles.subtle}>No stock items match this filter.</Text>
             ) : (
               filtered.map((item) => (
-                <View key={item.id} style={styles.couponCard}>
+                <View key={item.id} style={[styles.couponCard, { paddingVertical: 14 }]}>
                   <View style={{ flex: 1 }}>
-                    <Text style={styles.cardName}>
-                      {item.status === "out" ? "Out" : "Low"} ? {item.name}
-                    </Text>
+                    <View style={{ flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 4 }}>
+                      <View style={{
+                        backgroundColor: item.status === "out" ? colors.rdl : colors.al,
+                        paddingHorizontal: 8,
+                        paddingVertical: 2,
+                        borderRadius: 6,
+                      }}>
+                        <Text style={{
+                          color: item.status === "out" ? colors.rd : colors.am,
+                          fontSize: 11,
+                          fontWeight: "bold",
+                        }}>
+                          {item.status === "out" ? "🔴 OUT" : "⚠️ LOW"}
+                        </Text>
+                      </View>
+                      <Text style={[styles.cardName, { marginBottom: 0 }]}>{item.name}</Text>
+                    </View>
                     <Text style={styles.cardPrice}>
-                      {item.qty} {item.unit} ? {item.addedAt}
+                      {item.qty} {item.unit}  •  {item.addedAt}
                     </Text>
-                    {item.notes ? <Text style={styles.cardPrice}>{item.notes}</Text> : null}
+                    {item.notes ? (
+                      <Text style={[styles.cardPrice, { fontStyle: "italic", marginTop: 4, color: colors.ts }]}>
+                        "{item.notes}"
+                      </Text>
+                    ) : null}
                   </View>
-                  <TouchableOpacity onPress={() => onDeleteItem(item.id)}>
-                    <Text style={{ fontSize: 18 }}>X</Text>
+                  <TouchableOpacity onPress={() => onDeleteItem(item.id)} style={{ padding: 6 }}>
+                    <CustomIcon name="trash" size={18} color={colors.rd} />
                   </TouchableOpacity>
                 </View>
               ))
@@ -384,7 +410,7 @@ function ManageCard({ title, val, sub, icon, theme, onPress, valColor, colors })
   );
 }
 
-export function AdminHome({ styles, goTo, pendingCount, onOpenDrawer }) {
+export function AdminHome({ styles, goTo, pendingCount, onOpenDrawer, billsCount }) {
   const { colors } = useTheme();
 
   const categories = [
@@ -482,6 +508,19 @@ export function AdminHome({ styles, goTo, pendingCount, onOpenDrawer }) {
             colors={colors}
           />
         </View>
+        <TouchableOpacity
+          style={[styles.couponCard, { flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingVertical: 14, borderColor: colors.gm, marginTop: 10 }]}
+          onPress={() => goTo("adm-bills")}
+        >
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+            <ColoredIcon name="booking" colorTheme="green" size={16} />
+            <Text style={{ color: colors.tp, fontSize: 13, fontWeight: "bold" }}>Purchased Bills</Text>
+          </View>
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+            <Text style={{ color: colors.gm, fontSize: 14, fontWeight: "bold" }}>{billsCount}</Text>
+            <Text style={{ color: colors.ts, fontSize: 14 }}>›</Text>
+          </View>
+        </TouchableOpacity>
       </View>
 
       <View style={{
@@ -647,6 +686,7 @@ export function PurchaserDashboard({ styles, goTo, stats, onOpenDrawer }) {
         </View>
         <PrimaryBtn title="View Requests" onPress={() => goTo("prequests")} styles={styles} />
         <PrimaryBtn title="Purchase History" onPress={() => goTo("phistory")} color={colors.gm} styles={styles} />
+        <PrimaryBtn title="Upload Bill" onPress={() => { goTo("p-upload-bill"); }} color={colors.gd} styles={styles} />
       </ScrollView>
     </View>
   );
@@ -660,6 +700,7 @@ export function PurchaserRequests({
   setFilter,
   onAccept,
   onMarkDelivered,
+  onOpenBillUpload,
 }) {
   const { colors } = useTheme();
   const list = filter === "all" ? requests : requests.filter((r) => r.status === filter);
@@ -684,15 +725,22 @@ export function PurchaserRequests({
           list.map((r) => {
             const idx = requests.findIndex((x) => x.id === r.id);
             return (
-              <View key={r.id} style={styles.couponCard}>
-                <Text style={styles.cardName}>
-                  {r.id} ? {r.name}
+              <View key={r.id} style={[styles.couponCard, { flexDirection: "column", alignItems: "stretch", paddingVertical: 14 }]}>
+                <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
+                  <Text style={styles.cardName}>
+                    {r.name}
+                  </Text>
+                  <Text style={[styles.cardPrice, { color: colors.ts }]}>{r.id}</Text>
+                </View>
+                <Text style={[styles.cardPrice, { marginTop: 4 }]}>
+                  Qty: {r.qty}  •  Priority: {r.priority}  •  Status: {r.status}
                 </Text>
-                <Text style={styles.cardPrice}>
-                  Qty: {r.qty} ? {r.priority} ? {r.status}
-                </Text>
-                {r.notes ? <Text style={styles.cardPrice}>{r.notes}</Text> : null}
-                <View style={{ flexDirection: "row", gap: 6, marginTop: 8, flexWrap: "wrap" }}>
+                {r.notes ? (
+                  <Text style={[styles.cardPrice, { fontStyle: "italic", marginTop: 4, color: colors.ts }]}>
+                    "{r.notes}"
+                  </Text>
+                ) : null}
+                <View style={{ flexDirection: "row", gap: 8, marginTop: 8, flexWrap: "wrap", alignItems: "center" }}>
                   {r.status === "pending" && (
                     <TouchableOpacity
                       style={[styles.primaryBtn, { paddingVertical: 8, paddingHorizontal: 10 }]}
@@ -707,6 +755,24 @@ export function PurchaserRequests({
                       onPress={() => onMarkDelivered(idx)}
                     >
                       <Text style={styles.primaryBtnText}>Delivered</Text>
+                    </TouchableOpacity>
+                  )}
+                  {(r.status === "purchased" || r.status === "delivered") && (
+                    <TouchableOpacity
+                      style={[
+                        styles.outlineBtn, 
+                        { paddingVertical: 6, paddingHorizontal: 10, borderColor: r.billAttached ? colors.gm : colors.am }
+                      ]}
+                      onPress={() => onOpenBillUpload(r)}
+                      disabled={r.billAttached}
+                    >
+                      <Text style={{ 
+                        color: r.billAttached ? colors.gm : colors.am, 
+                        fontSize: 12, 
+                        fontWeight: "600" 
+                      }}>
+                        {r.billAttached ? "✓ Bill Uploaded" : "🧾 Upload Bill"}
+                      </Text>
                     </TouchableOpacity>
                   )}
                 </View>
@@ -961,3 +1027,372 @@ export function AdminInventoryView({
 }
 
 export { categoryIcons, renderTopBar };
+
+
+export function PurchaserBillUpload({
+  styles,
+  goTo,
+  activeRequest,
+  requests = [],
+  onUploadSuccess,
+}) {
+  const { colors } = useTheme();
+  const [invoiceNo, setInvoiceNo] = React.useState("");
+  const [amount, setAmount] = React.useState("");
+  const [date, setDate] = React.useState(
+    new Date().toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })
+  );
+  const [remarks, setRemarks] = React.useState("");
+  const [fileName, setFileName] = React.useState("");
+  const [formError, setFormError] = React.useState(null);
+  const [imageUri, setImageUri] = React.useState(null);
+  const [fileSize, setFileSize] = React.useState(0);
+
+  const eligibleRequests = requests.filter(
+    (r) => (r.status === "purchased" || r.status === "delivered") && !r.billAttached
+  );
+
+  const [selectedReq, setSelectedReq] = React.useState(activeRequest || null);
+
+  React.useEffect(() => {
+    setSelectedReq(activeRequest);
+  }, [activeRequest]);
+
+  const handleAttach = () => {
+    if (Platform.OS === "web") {
+      try {
+        const input = document.createElement("input");
+        input.type = "file";
+        input.accept = "image/*";
+        input.onchange = (event) => {
+          const file = event.target.files[0];
+          if (file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+              setFileName(file.name);
+              setFileSize(Math.round(file.size / 1024));
+              setImageUri(e.target.result);
+              setFormError(null);
+            };
+            reader.readAsDataURL(file);
+          }
+        };
+        input.click();
+      } catch (err) {
+        setFormError("Failed to open file picker.");
+      }
+    } else {
+      setFileName(`receipt_${selectedReq ? selectedReq.id : "standalone"}.jpg`);
+      setFileSize(240);
+      setImageUri(null);
+      setFormError(null);
+    }
+  };
+
+  const handleUpload = () => {
+    if (!amount) {
+      setFormError("Please enter the bill amount.");
+      return;
+    }
+    if (!date || !date.trim()) {
+      setFormError("Please enter the bill date.");
+      return;
+    }
+    if (!fileName) {
+      setFormError("Please attach a receipt image.");
+      return;
+    }
+
+    onUploadSuccess({
+      reqId: selectedReq ? selectedReq.id : "standalone",
+      itemName: selectedReq ? selectedReq.name : "General Purchase",
+      invoiceNo: invoiceNo || "N/A",
+      amount: amount,
+      date: date,
+      remarks: remarks || "None",
+      fileName: fileName,
+      fileSize: fileSize || 240,
+      imageUri: imageUri || null,
+    });
+  };
+
+  return (
+    <View style={styles.page}>
+      {renderTopBar(styles, "Upload Purchase Bill", () => goTo("pdashboard"))}
+      <ScrollView contentContainerStyle={styles.scroll}>
+        {!activeRequest && eligibleRequests.length > 0 && (
+          <View style={{ marginBottom: 12 }}>
+            <Text style={styles.inputLabel}>Select Purchase to Link</Text>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ flexDirection: "row", marginVertical: 6 }}>
+              {eligibleRequests.map((r) => {
+                const isSelected = selectedReq && selectedReq.id === r.id;
+                return (
+                  <TouchableOpacity
+                    key={r.id}
+                    onPress={() => setSelectedReq(isSelected ? null : r)}
+                    style={{
+                      backgroundColor: isSelected ? colors.gl : colors.cb,
+                      borderColor: isSelected ? colors.gm : colors.bd,
+                      borderWidth: 1.5,
+                      borderRadius: 10,
+                      paddingHorizontal: 12,
+                      paddingVertical: 8,
+                      marginRight: 8,
+                    }}
+                  >
+                    <Text style={{ fontSize: 13, fontWeight: "bold", color: isSelected ? colors.gm : colors.tp }}>
+                      {r.name}
+                    </Text>
+                    <Text style={{ fontSize: 10, color: colors.ts, marginTop: 2 }}>
+                      {r.id} • {r.qty}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </ScrollView>
+          </View>
+        )}
+
+        {selectedReq && (
+          <View style={[styles.couponCard, { backgroundColor: colors.gl, borderStyle: "dashed", paddingVertical: 12 }]}>
+            <Text style={[styles.cardName, { color: colors.gd }]}>Linked Request: {selectedReq.id}</Text>
+            <Text style={styles.cardPrice}>{selectedReq.name} • {selectedReq.qty}</Text>
+            {!activeRequest && (
+              <TouchableOpacity onPress={() => setSelectedReq(null)} style={{ marginTop: 4 }}>
+                <Text style={{ color: colors.rd, fontSize: 11, fontWeight: "bold" }}>✕ Unlink</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+        )}
+
+        <Field
+          label="Invoice / Bill Number"
+          value={invoiceNo}
+          onChangeText={invoiceNo => { setInvoiceNo(invoiceNo); setFormError(null); }}
+          placeholder="e.g. INV-9923"
+          styles={styles}
+        />
+
+        <Field
+          label="Bill Amount (₹) *"
+          value={amount}
+          onChangeText={amount => { setAmount(amount); setFormError(null); }}
+          placeholder="e.g. 450"
+          keyboardType="number-pad"
+          styles={styles}
+        />
+
+        <Field
+          label="Bill Date *"
+          value={date}
+          onChangeText={date => { setDate(date); setFormError(null); }}
+          placeholder="e.g. 9 Jul 2026"
+          styles={styles}
+        />
+
+        <Field
+          label="Remarks / Notes"
+          value={remarks}
+          onChangeText={remarks => { setRemarks(remarks); setFormError(null); }}
+          placeholder="e.g. Purchased from Sai stores"
+          styles={styles}
+        />
+
+        <Text style={styles.inputLabel}>Receipt Image *</Text>
+        {fileName ? (
+          <View style={[styles.couponCard, { flexDirection: "row", alignItems: "center", justifyContent: "space-between", borderColor: colors.gm, paddingVertical: 12 }]}>
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+              <Text style={{ fontSize: 24 }}>🧾</Text>
+              <View>
+                <Text style={[styles.cardName, { color: colors.gm }]}>{fileName}</Text>
+                <Text style={{ fontSize: 11, color: colors.ts }}>{fileSize} KB • Image</Text>
+              </View>
+            </View>
+            <TouchableOpacity onPress={() => setFileName("")}>
+              <Text style={{ color: colors.rd, fontWeight: "bold" }}>Remove</Text>
+            </TouchableOpacity>
+          </View>
+        ) : (
+          <TouchableOpacity
+            onPress={handleAttach}
+            style={{
+              borderWidth: 2,
+              borderColor: colors.bd,
+              borderStyle: "dashed",
+              borderRadius: 12,
+              padding: 24,
+              alignItems: "center",
+              justifyContent: "center",
+              backgroundColor: colors.cb,
+              marginVertical: 6,
+            }}
+          >
+            <Text style={{ fontSize: 28, marginBottom: 6 }}>📷</Text>
+            <Text style={{ color: colors.ts, fontSize: 13, fontWeight: "500" }}>Tap to attach receipt photo</Text>
+          </TouchableOpacity>
+        )}
+
+        <View style={{ height: 16 }} />
+        {formError && (
+          <Text style={{ color: colors.rd, fontSize: 13, fontWeight: "600", textAlign: "center", marginBottom: 12 }}>
+            ⚠️ {formError}
+          </Text>
+        )}
+        <PrimaryBtn title="📤 Upload Bill to Admin" onPress={handleUpload} color={colors.gm} styles={styles} />
+        <View style={{ height: 8 }} />
+        <TouchableOpacity style={styles.outlineBtn} onPress={() => goTo("pdashboard")}>
+          <Text style={styles.outlineBtnText}>Cancel</Text>
+        </TouchableOpacity>
+      </ScrollView>
+    </View>
+  );
+}
+
+export function AdminBillsView({
+  styles,
+  goTo,
+  bills,
+}) {
+  const { colors } = useTheme();
+  const [selectedBill, setSelectedBill] = React.useState(null);
+  const [showModal, setShowModal] = React.useState(false);
+
+  const handleViewReceipt = (bill) => {
+    setSelectedBill(bill);
+    setShowModal(true);
+  };
+
+  return (
+    <View style={styles.page}>
+      {renderTopBar(styles, "Purchaser Bills", () => goTo("adm-home"))}
+      <ScrollView contentContainerStyle={styles.scroll}>
+        {bills.length === 0 ? (
+          <Text style={styles.subtle}>No uploaded bills found.</Text>
+        ) : (
+          bills.map((bill) => (
+            <View key={bill.id} style={[styles.couponCard, { flexDirection: "column", alignItems: "stretch", paddingVertical: 14 }]}>
+              <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
+                <Text style={[styles.cardName, { color: colors.gd }]}>{bill.itemName}</Text>
+                <Text style={{ fontSize: 11, color: colors.ts, fontWeight: "600" }}>{bill.id}</Text>
+              </View>
+
+              <Text style={styles.cardPrice}>Invoice No: {bill.invoiceNo}</Text>
+              <Text style={[styles.cardPrice, { fontWeight: "bold", color: colors.tp, marginVertical: 2 }]}>
+                Amount: ₹ {bill.amount}
+              </Text>
+              <Text style={styles.cardPrice}>Uploaded by: {bill.purchaser} • {bill.date}</Text>
+              
+              {bill.remarks ? (
+                <Text style={[styles.cardPrice, { fontStyle: "italic", marginTop: 4, color: colors.ts }]}>
+                  "{bill.remarks}"
+                </Text>
+              ) : null}
+
+              <TouchableOpacity
+                style={[styles.outlineBtn, { marginTop: 10, paddingVertical: 6, borderColor: colors.gm }]}
+                onPress={() => handleViewReceipt(bill)}
+              >
+                <Text style={[styles.outlineBtnText, { color: colors.gm, fontSize: 12 }]}>📷 View Receipt</Text>
+              </TouchableOpacity>
+            </View>
+          ))
+        )}
+      </ScrollView>
+
+      {/* Receipt Modal */}
+      <Modal visible={showModal} transparent animationType="fade" onRequestClose={() => setShowModal(false)}>
+        <TouchableOpacity style={styles.drawerOverlay} onPress={() => setShowModal(false)}>
+          <TouchableOpacity
+            style={{
+              width: 320,
+              backgroundColor: colors.cb,
+              borderRadius: 20,
+              padding: 20,
+              alignItems: "center",
+              borderWidth: 1.5,
+              borderColor: colors.bd,
+            }}
+            activeOpacity={1}
+          >
+            <View style={{ width: "100%", flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+              <Text style={{ color: colors.tp, fontSize: 16, fontWeight: "bold" }}>Receipt Detail</Text>
+              <TouchableOpacity onPress={() => setShowModal(false)}>
+                <Text style={{ fontSize: 18, color: colors.ts }}>✕</Text>
+              </TouchableOpacity>
+            </View>
+
+            {selectedBill && (
+              <View style={{ width: "100%", alignItems: "center" }}>
+                <View style={{
+                  width: "100%",
+                  height: 180,
+                  backgroundColor: "#0F291B",
+                  borderRadius: 12,
+                  alignItems: "center",
+                  justifyContent: "center",
+                  padding: 16,
+                  marginBottom: 16,
+                  overflow: "hidden",
+                }}>
+                  {selectedBill.imageUri ? (
+                    <Image
+                      source={{ uri: selectedBill.imageUri }}
+                      style={{ width: 280, height: 180, borderRadius: 8 }}
+                      resizeMode="contain"
+                    />
+                  ) : (
+                    <>
+                      <Text style={{ fontSize: 32, marginBottom: 8 }}>🧾</Text>
+                      <Text style={{ color: "#4ade80", fontSize: 24, fontWeight: "bold" }}>
+                        ₹ {selectedBill.amount}.00
+                      </Text>
+                      <Text style={{ color: "rgba(255,255,255,0.6)", fontSize: 11, marginTop: 4 }}>
+                        Invoice: {selectedBill.invoiceNo}
+                      </Text>
+                      <Text style={{ color: "rgba(255,255,255,0.5)", fontSize: 9, marginTop: 2 }}>
+                        {selectedBill.date} • {selectedBill.purchaser}
+                      </Text>
+                    </>
+                  )}
+                </View>
+
+                <View style={{ width: "100%", gap: 6, marginBottom: 8 }}>
+                  <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+                    <Text style={{ color: colors.ts, fontSize: 12 }}>Item</Text>
+                    <Text style={{ color: colors.tp, fontSize: 12, fontWeight: "600" }}>{selectedBill.itemName}</Text>
+                  </View>
+                  <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+                    <Text style={{ color: colors.ts, fontSize: 12 }}>Req ID</Text>
+                    <Text style={{ color: colors.tp, fontSize: 12, fontWeight: "600" }}>{selectedBill.reqId}</Text>
+                  </View>
+                  <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+                    <Text style={{ color: colors.ts, fontSize: 12 }}>Filename</Text>
+                    <Text style={{ color: colors.gm, fontSize: 12, fontWeight: "600" }}>{selectedBill.fileName}</Text>
+                  </View>
+                </View>
+
+                <TouchableOpacity
+                  style={[styles.primaryBtn, { marginTop: 12, backgroundColor: colors.gm, width: "100%" }]}
+                  onPress={() => {
+                    if (Platform.OS === 'web') {
+                      const link = document.createElement('a');
+                      link.href = selectedBill.imageUri || 'https://images.unsplash.com/photo-1556742044-3c52d6e88c62?q=80&w=400';
+                      link.download = selectedBill.fileName || `${selectedBill.id}_receipt.jpg`;
+                      document.body.appendChild(link);
+                      link.click();
+                      document.body.removeChild(link);
+                    } else {
+                      alert("Downloading is only supported on Web browsers.");
+                    }
+                  }}
+                >
+                  <Text style={styles.primaryBtnText}>📥 Download Receipt</Text>
+                </TouchableOpacity>
+              </View>
+            )}
+          </TouchableOpacity>
+        </TouchableOpacity>
+      </Modal>
+    </View>
+  );
+}

@@ -23,6 +23,8 @@ import {
   PurchaserDashboard,
   PurchaserRequests,
   RoleDrawer,
+  PurchaserBillUpload,
+  AdminBillsView,
 } from "./components/RoleViews";
 import {
   CREDENTIALS,
@@ -91,6 +93,7 @@ function AppContent() {
     { id: "EG-20260425-0004", key: "2026-04-25-Egg", item: "Egg", icon: "E", day: 25, qty: 1, price: 15, total: 15, time: "09:00 AM", status: "Confirmed" },
   ]);
   const [bookingTab, setBookingTab] = useState("upcoming");
+
   const [simAfter10, setSimAfter10] = useState(false);
   const [selectedDay, setSelectedDay] = useState(14);
   const [bookingCounter, setBookingCounter] = useState(5);
@@ -107,6 +110,35 @@ function AppContent() {
   const [rechargeCount, setRechargeCount] = useState(1);
   const [rechargeResult, setRechargeResult] = useState(null);
   const [showUploadErr, setShowUploadErr] = useState(false);
+  const [loginError, setLoginError] = useState(null);
+  const [activeBillRequest, setActiveBillRequest] = useState(null);
+  const [latestBill, setLatestBill] = useState(null);
+  const [uploadedBills, setUploadedBills] = useState([
+    {
+      id: "BILL-0001",
+      reqId: "REQ-0001",
+      itemName: "Oil",
+      invoiceNo: "INV-9901",
+      amount: "450",
+      date: "9 Jul 2026",
+      remarks: "Purchased from Raj Wholesale",
+      fileName: "bill_REQ-0001.jpg",
+      purchaser: "Rajan Kumar",
+      imageUri: "https://images.unsplash.com/photo-1556742044-3c52d6e88c62?q=80&w=400",
+    },
+    {
+      id: "BILL-0002",
+      reqId: "REQ-0002",
+      itemName: "beetroot",
+      invoiceNo: "INV-9902",
+      amount: "150",
+      date: "9 Jul 2026",
+      remarks: "Fresh beetroot, Sai Stores",
+      fileName: "bill_REQ-0002.jpg",
+      purchaser: "Rajan Kumar",
+      imageUri: "https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?q=80&w=400",
+    }
+  ]);
   const [showUtrErr, setShowUtrErr] = useState(false);
 
   const [chefBookingDB, setChefBookingDB] = useState(() => seedChefBookingDB());
@@ -235,6 +267,8 @@ function AppContent() {
   };
 
   const handleLogin = () => {
+    setLoginError(null);
+
     const email = loginEmail.trim().toLowerCase();
     const pass = loginPass.trim();
     if (email === CREDENTIALS.admin.email && pass === CREDENTIALS.admin.pass) {
@@ -253,12 +287,12 @@ function AppContent() {
       resetTo("pdashboard");
       return;
     }
-    if (email === CREDENTIALS.customer.email) {
+    if ((email === CREDENTIALS.customer.email || email.endsWith("@stqc.gov.in")) && pass.length > 0) {
       setCurrentRole("user");
       resetTo("home");
       return;
     }
-    alert("Invalid credentials!");
+    setLoginError("Invalid credentials");
   };
 
   const openBooking = (item) => {
@@ -617,15 +651,21 @@ function AppContent() {
                   <Field
                     label="Email Address *"
                     value={loginEmail}
-                    onChangeText={setLoginEmail}
-                    placeholder="e.g. customerertls@gmail.com"
+                    onChangeText={(text) => {
+                      setLoginEmail(text);
+                      setLoginError(null);
+                    }}
+                    placeholder="e.g. customer@stqc.gov.in"
                     autoCapitalize="none"
                     icon="profile"
                   />
                   <Field
                     label="Password *"
                     value={loginPass}
-                    onChangeText={setLoginPass}
+                    onChangeText={(text) => {
+                      setLoginPass(text);
+                      setLoginError(null);
+                    }}
                     placeholder="Enter password"
                     secureTextEntry
                     icon="lock"
@@ -634,6 +674,11 @@ function AppContent() {
                   <TouchableOpacity onPress={() => goTo("forgotpw")} style={{ alignSelf: "flex-end" }}>
                     <Text style={styles.forgot}>Forgot Password?</Text>
                   </TouchableOpacity>
+                  {loginError && (
+                    <Text style={{ color: colors.rd, fontSize: 13, fontWeight: "600", textAlign: "center", marginBottom: 10 }}>
+                      ⚠️ {loginError}
+                    </Text>
+                  )}
                   <PrimaryBtn title="Login" onPress={handleLogin} />
                 </View>
             </View>
@@ -668,7 +713,7 @@ function AppContent() {
                   </View>
                 </TouchableOpacity>
                 {showDesignationDropdown && (
-                  <View style={{ backgroundColor: colors.card, borderWidth: 1, borderColor: colors.bd, borderRadius: 8, marginTop: 4, padding: 4 }}>
+                  <View style={{ backgroundColor: colors.cb, borderWidth: 1, borderColor: colors.bd, borderRadius: 8, marginTop: 4, padding: 4 }}>
                     {["Permanent", "Contract", "Intern"].map((item) => (
                       <TouchableOpacity
                         key={item}
@@ -678,7 +723,7 @@ function AppContent() {
                           setShowDesignationDropdown(false);
                         }}
                       >
-                        <Text style={{ color: colors.text }}>{item}</Text>
+                        <Text style={{ color: colors.tp }}>{item}</Text>
                       </TouchableOpacity>
                     ))}
                   </View>
@@ -1142,7 +1187,7 @@ function AppContent() {
                     </View>
                     <View style={{ flex: 1 }}>
                       <Text style={styles.cardName}>{b.item}</Text>
-                      <Text style={styles.cardPrice}>Qty: {b.qty}  {b.day} Apr 2026 ? {b.time || "12:30 PM"}</Text>
+                      <Text style={styles.cardPrice}>Qty: {b.qty}  •  {b.day} Apr 2026  •  {b.time || "12:30 PM"}</Text>
                     </View>
                   </View>
                   <View style={{ alignItems: 'flex-end' }}>
@@ -1365,7 +1410,12 @@ function AppContent() {
             <Text style={styles.bhTitle}>Request Submitted</Text>
           </View>
           <ScrollView contentContainerStyle={[styles.scroll, { alignItems: "center" }]}>
-            <Text style={{ fontSize: 60 }}></Text>
+            <CustomIcon
+              name="check"
+              size={60}
+              color={colors.gm}
+              style={{ alignSelf: "center", marginVertical: 12 }}
+            />
             <Text style={[styles.sectionTitle, { color: colors.gd }]}>Request Submitted!</Text>
             <Text style={[styles.subtle, { textAlign: "center" }]}>
               Your recharge request has been sent to the admin for verification.
@@ -1416,6 +1466,13 @@ function AppContent() {
           onSubmitList={submitChefList}
           listStats={chefListStats}
           filteredRecs={filteredChefRecs}
+          onUnlockList={() => {
+            setSubmittedKeys((s) => {
+              const next = new Set(s);
+              next.delete(chefListKey);
+              return next;
+            });
+          }}
         />
       )}
       {screen === "chef-history" && (
@@ -1436,7 +1493,12 @@ function AppContent() {
             <Text style={styles.bhTitle}>List Submitted</Text>
           </View>
           <ScrollView contentContainerStyle={styles.scroll}>
-            <Text style={{ fontSize: 48, textAlign: "center" }}></Text>
+            <CustomIcon
+              name="check"
+              size={54}
+              color={colors.gm}
+              style={{ alignSelf: "center", marginVertical: 12 }}
+            />
             <Text style={[styles.sectionTitle, { textAlign: "center", color: colors.gd }]}>
               {chefSubmitSummary.icon} {chefSubmitSummary.cat}
             </Text>
@@ -1449,6 +1511,19 @@ function AppContent() {
               <CRow label="Pending" value={String(chefSubmitSummary.pending)} total />
             </View>
             <PrimaryBtn title="Back to Chef Home" onPress={() => goTo("chef-home")} />
+            <View style={{ height: 8 }} />
+            <PrimaryBtn
+              title="✏️ Edit Entry"
+              onPress={() => {
+                setSubmittedKeys((s) => {
+                  const next = new Set(s);
+                  next.delete(chefListKey);
+                  return next;
+                });
+                goTo("chef-list");
+              }}
+              color={colors.am}
+            />
           </ScrollView>
         </View>
       )}
@@ -1480,6 +1555,7 @@ function AppContent() {
           goTo={goTo}
           pendingCount={pendingRecharge}
           onOpenDrawer={() => setAdmDrawerOpen(true)}
+          billsCount={uploadedBills.length}
         />
       )}
       {screen === "adm-recharge" && (
@@ -1753,6 +1829,65 @@ function AppContent() {
           onOpenDrawer={() => setPDrawerOpen(true)}
         />
       )}
+      {screen === "p-upload-bill" && (
+        <PurchaserBillUpload
+          styles={styles}
+          goTo={goTo}
+          activeRequest={activeBillRequest}
+          requests={pRequests}
+          onUploadSuccess={(billData) => {
+            const billId = `BILL-${String(uploadedBills.length + 1).padStart(4, "0")}`;
+            const newBill = {
+              id: billId,
+              purchaser: "Rajan Kumar",
+              ...billData,
+            };
+            setUploadedBills((prev) => [newBill, ...prev]);
+            // Mark request as billAttached
+            if (billData.reqId !== "standalone") {
+              setPRequests((list) =>
+                list.map((r) =>
+                  r.id === billData.reqId ? { ...r, billAttached: true } : r
+                )
+              );
+            }
+            setLatestBill(newBill);
+            goTo("p-upload-success");
+          }}
+        />
+      )}
+      {screen === "p-upload-success" && latestBill && (
+        <View style={styles.page}>
+          <View style={styles.topBar}>
+            <Text style={styles.topTitle}>Bill Uploaded</Text>
+          </View>
+          <ScrollView contentContainerStyle={[styles.scroll, { alignItems: "center", paddingTop: 30 }]}>
+            <View style={{ width: 70, height: 70, borderRadius: 35, backgroundColor: colors.gl, alignItems: "center", justifyContent: "center", marginBottom: 16 }}>
+              <Text style={{ fontSize: 32, color: colors.gm }}>✓</Text>
+            </View>
+            <Text style={{ fontSize: 20, fontWeight: "bold", color: colors.gd, marginBottom: 8 }}>Success!</Text>
+            <Text style={{ fontSize: 13, color: colors.ts, textAlign: "center", paddingHorizontal: 20, marginBottom: 20 }}>
+              The bill has been successfully uploaded and sent to the admin for verification.
+            </Text>
+            <View style={styles.successCard}>
+              <CRow label="Bill ID" value={latestBill.id} />
+              <CRow label="Linked Req" value={latestBill.reqId} />
+              <CRow label="Invoice No" value={latestBill.invoiceNo} />
+              <CRow label="Amount" value={`₹ ${latestBill.amount}`} />
+              <CRow label="Remarks" value={latestBill.remarks} />
+            </View>
+            <View style={{ height: 24 }} />
+            <PrimaryBtn title="Back to Dashboard" onPress={() => goTo("pdashboard")} />
+          </ScrollView>
+        </View>
+      )}
+      {screen === "adm-bills" && (
+        <AdminBillsView
+          styles={styles}
+          goTo={goTo}
+          bills={uploadedBills}
+        />
+      )}
       {screen === "prequests" && (
         <PurchaserRequests
           styles={styles}
@@ -1762,6 +1897,10 @@ function AppContent() {
           setFilter={setPReqFilter}
           onAccept={acceptPurchaser}
           onMarkDelivered={markPurchaserDelivered}
+          onOpenBillUpload={(r) => {
+            setActiveBillRequest(r);
+            goTo("p-upload-bill");
+          }}
         />
       )}
       {screen === "phistory" && (
@@ -1895,6 +2034,7 @@ function AppContent() {
         rows={[
           { iconName: "home", colorTheme: "green", label: "Admin Home", onPress: () => { setAdmDrawerOpen(false); goTo("adm-home"); } },
           { iconName: "wallet", colorTheme: "amber", label: "Recharge", onPress: () => { setAdmDrawerOpen(false); goTo("adm-recharge"); } },
+          { iconName: "booking", colorTheme: "green", label: "Purchaser Bills", onPress: () => { setAdmDrawerOpen(false); goTo("adm-bills"); } },
           { iconName: "logout", colorTheme: "red", label: "Logout", onPress: () => { setAdmDrawerOpen(false); logout(); }, danger: true },
         ]}
         styles={styles}
@@ -1907,6 +2047,7 @@ function AppContent() {
         rows={[
           { iconName: "chart", colorTheme: "blue", label: "Dashboard", onPress: () => { setPDrawerOpen(false); goTo("pdashboard"); } },
           { iconName: "booking", colorTheme: "orange", label: "Requests", onPress: () => { setPDrawerOpen(false); goTo("prequests"); } },
+          { iconName: "wallet", colorTheme: "green", label: "Upload Bill", onPress: () => { setPDrawerOpen(false); setActiveBillRequest(null); goTo("p-upload-bill"); } },
           { iconName: "logout", colorTheme: "red", label: "Logout", onPress: () => { setPDrawerOpen(false); logout(); }, danger: true },
         ]}
         styles={styles}
@@ -1932,7 +2073,7 @@ function FilterRow({ options, value, onChange }) {
   );
 }
 
-function Field({ label, value, onChangeText, placeholder, secureTextEntry, autoCapitalize, half, icon, rightElement, keyboardType }) {
+function Field({ label, value, onChangeText, placeholder, secureTextEntry, autoCapitalize, half, icon, rightElement, keyboardType, maxLength }) {
   const { colors, styles } = useAppStyles();
   const controlled = value !== undefined;
   return (
@@ -1955,6 +2096,7 @@ function Field({ label, value, onChangeText, placeholder, secureTextEntry, autoC
           secureTextEntry={secureTextEntry}
           autoCapitalize={autoCapitalize}
           keyboardType={keyboardType}
+          maxLength={maxLength}
         />
         {rightElement}
       </View>
@@ -2428,7 +2570,7 @@ const createStyles = (colors) => StyleSheet.create({
   idLbl: { color: "rgba(255,255,255,0.7)", fontSize: 11, textTransform: "uppercase" },
   idVal: { color: "#fff", fontWeight: "600" },
   confirmTable: { backgroundColor: colors.gl, borderRadius: 13, padding: 12 },
-  cRow: { flexDirection: "row", justifyContent: "space-between", paddingVertical: 4 },
+  cRow: { flexDirection: "row", justifyContent: "space-between", paddingVertical: 4, width: "100%" },
   cRowTotal: { marginTop: 4, borderTopWidth: 1, borderTopColor: colors.bd, paddingTop: 8 },
   couponTotal: {
     backgroundColor: colors.gl,
@@ -2527,6 +2669,7 @@ const createStyles = (colors) => StyleSheet.create({
     borderRadius: 14,
     padding: 14,
     width: "100%",
+    alignSelf: "stretch",
   },
   filterChip: {
     borderWidth: 1,
