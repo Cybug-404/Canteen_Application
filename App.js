@@ -72,12 +72,13 @@ function AppContent() {
   const [admDrawerOpen, setAdmDrawerOpen] = useState(false);
   const [pDrawerOpen, setPDrawerOpen] = useState(false);
 
-  const [loginEmail, setLoginEmail] = useState("customer@stqc.gov.in");
+  const [loginEmail, setLoginEmail] = useState("customerertls@gmail.com");
   const [loginPass, setLoginPass] = useState("");
 
   const [signupFirstName, setSignupFirstName] = useState("");
   const [signupLastName, setSignupLastName] = useState("");
   const [signupDesignation, setSignupDesignation] = useState("");
+  const [showDesignationDropdown, setShowDesignationDropdown] = useState(false);
   const [signupEmail, setSignupEmail] = useState("");
   const [signupPassword, setSignupPassword] = useState("");
 
@@ -90,9 +91,6 @@ function AppContent() {
     { id: "EG-20260425-0004", key: "2026-04-25-Egg", item: "Egg", icon: "E", day: 25, qty: 1, price: 15, total: 15, time: "09:00 AM", status: "Confirmed" },
   ]);
   const [bookingTab, setBookingTab] = useState("upcoming");
-  const [loginMode, setLoginMode] = useState("otp");
-  const [phoneNumber, setPhoneNumber] = useState("+91 98765 43210");
-  const [otpValue, setOtpValue] = useState("");
   const [simAfter10, setSimAfter10] = useState(false);
   const [selectedDay, setSelectedDay] = useState(14);
   const [bookingCounter, setBookingCounter] = useState(5);
@@ -255,8 +253,12 @@ function AppContent() {
       resetTo("pdashboard");
       return;
     }
-    setCurrentRole("user");
-    resetTo("home");
+    if (email === CREDENTIALS.customer.email) {
+      setCurrentRole("user");
+      resetTo("home");
+      return;
+    }
+    alert("Invalid credentials!");
   };
 
   const openBooking = (item) => {
@@ -333,7 +335,7 @@ function AppContent() {
         id,
         user: "Anushka Sharma",
         avatar: "U",
-        email: "anushka@stqc.gov.in",
+        email: "customerertls@gmail.com",
         amount: amt,
         mode: selectedMode,
         utr: utr.trim(),
@@ -611,60 +613,12 @@ function AppContent() {
 
           {authTab === "login" ? (
             <View style={styles.formGap}>
-              <View style={[styles.tabRow, { backgroundColor: colors.gl, marginTop: 4 }]}>
-                <TouchableOpacity
-                  style={[styles.tabBtn, loginMode === "otp" && { backgroundColor: colors.gm }]}
-                  onPress={() => setLoginMode("otp")}
-                >
-                  <Text style={[styles.tabText, loginMode === "otp" ? { color: "#fff" } : { color: colors.ts }]}>Mobile Number</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={[styles.tabBtn, loginMode === "password" && { backgroundColor: colors.gm }]}
-                  onPress={() => setLoginMode("password")}
-                >
-                  <Text style={[styles.tabText, loginMode === "password" ? { color: "#fff" } : { color: colors.ts }]}>Email</Text>
-                </TouchableOpacity>
-              </View>
-
-              {loginMode === "otp" ? (
-                <View style={styles.formGap}>
-                  <Field
-                    label="Mobile Number *"
-                    value={phoneNumber}
-                    onChangeText={setPhoneNumber}
-                    placeholder="Enter 10-digit mobile number"
-                    keyboardType="phone-pad"
-                    icon="phone"
-                  />
-                  <Field
-                    label="Enter OTP *"
-                    value={otpValue}
-                    onChangeText={setOtpValue}
-                    placeholder="Enter OTP"
-                    keyboardType="number-pad"
-                    icon="lock"
-                    rightElement={
-                      <TouchableOpacity onPress={() => alert(`OTP sent successfully to ${phoneNumber}`)}>
-                        <Text style={{ color: colors.gm, fontWeight: "600", fontSize: 13, marginRight: 4 }}>Send OTP</Text>
-                      </TouchableOpacity>
-                    }
-                  />
-                  <Text style={styles.hint}>
-                    Demo: customer (any pass), chef@stqc.gov.in / chef123, admin@stqc.gov.in / admin123,
-                    purchaser@stqc.gov.in / purchaser123
-                  </Text>
-                  <PrimaryBtn title="Login" onPress={handleLogin} />
-                  <TouchableOpacity onPress={() => setLoginMode("password")} style={{ alignSelf: "center", marginTop: 4 }}>
-                    <Text style={{ color: colors.gm, fontWeight: "500", fontSize: 12 }}>or login with password</Text>
-                  </TouchableOpacity>
-                </View>
-              ) : (
                 <View style={styles.formGap}>
                   <Field
                     label="Email Address *"
                     value={loginEmail}
                     onChangeText={setLoginEmail}
-                    placeholder="e.g. customer@stqc.gov.in"
+                    placeholder="e.g. customerertls@gmail.com"
                     autoCapitalize="none"
                     icon="profile"
                   />
@@ -676,19 +630,12 @@ function AppContent() {
                     secureTextEntry
                     icon="lock"
                   />
-                  <Text style={styles.hint}>
-                    Demo: customer (any pass), chef@stqc.gov.in / chef123, admin@stqc.gov.in / admin123,
-                    purchaser@stqc.gov.in / purchaser123
-                  </Text>
+
                   <TouchableOpacity onPress={() => goTo("forgotpw")} style={{ alignSelf: "flex-end" }}>
                     <Text style={styles.forgot}>Forgot Password?</Text>
                   </TouchableOpacity>
                   <PrimaryBtn title="Login" onPress={handleLogin} />
-                  <TouchableOpacity onPress={() => setLoginMode("otp")} style={{ alignSelf: "center", marginTop: 4 }}>
-                    <Text style={{ color: colors.gm, fontWeight: "500", fontSize: 12 }}>or login with OTP</Text>
-                  </TouchableOpacity>
                 </View>
-              )}
             </View>
           ) : (
             <View style={styles.formGap}>
@@ -696,25 +643,47 @@ function AppContent() {
                 <Field
                   label="First Name *"
                   value={signupFirstName}
-                  onChangeText={setSignupFirstName}
+                  onChangeText={(text) => setSignupFirstName(text.replace(/[^a-zA-Z]/g, ''))}
                   half
                   icon="profile"
                 />
                 <Field
                   label="Last Name *"
                   value={signupLastName}
-                  onChangeText={setSignupLastName}
+                  onChangeText={(text) => setSignupLastName(text.replace(/[^a-zA-Z]/g, ''))}
                   half
                   icon="profile"
                 />
               </View>
-              <Field
-                label="Designation *"
-                value={signupDesignation}
-                onChangeText={setSignupDesignation}
-                placeholder="e.g. Apprentice, Engineer"
-                icon="profile"
-              />
+              <View style={{ zIndex: 10 }}>
+                <TouchableOpacity onPress={() => setShowDesignationDropdown(!showDesignationDropdown)} activeOpacity={0.8}>
+                  <View pointerEvents="none">
+                    <Field
+                      label="Designation *"
+                      value={signupDesignation}
+                      onChangeText={() => {}}
+                      placeholder="Select Designation"
+                      icon="profile"
+                    />
+                  </View>
+                </TouchableOpacity>
+                {showDesignationDropdown && (
+                  <View style={{ backgroundColor: colors.card, borderWidth: 1, borderColor: colors.bd, borderRadius: 8, marginTop: 4, padding: 4 }}>
+                    {["Permanent", "Contract", "Intern"].map((item) => (
+                      <TouchableOpacity
+                        key={item}
+                        style={{ padding: 12, borderBottomWidth: item !== "Intern" ? 1 : 0, borderBottomColor: colors.bd }}
+                        onPress={() => {
+                          setSignupDesignation(item);
+                          setShowDesignationDropdown(false);
+                        }}
+                      >
+                        <Text style={{ color: colors.text }}>{item}</Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                )}
+              </View>
               <Field
                 label="Mobile / Email *"
                 value={signupEmail}
@@ -736,6 +705,10 @@ function AppContent() {
                 onPress={() => {
                   if (!signupFirstName.trim() || !signupLastName.trim() || !signupDesignation.trim() || !signupEmail.trim() || !signupPassword.trim()) {
                     alert("Please fill all required fields.");
+                    return;
+                  }
+                  if (signupPassword.length < 6) {
+                    alert("Password must be at least 6 characters.");
                     return;
                   }
                   setCurrentRole("user");
@@ -1237,7 +1210,7 @@ function AppContent() {
               <Field label="Last Name *" value="Sharma" half />
             </View>
             <Field label="Designation *" value="Apprentice" />
-            <Field label="Email" value="anushka@stqc.gov.in" />
+            <Field label="Email" value="customerertls@gmail.com" />
             <Field label="Mobile" value="+91 98765 43210" />
             <PrimaryBtn title="Save Changes" onPress={() => goTo("profile")} color={colors.gm} />
             <OutlineBtn title="Cancel" onPress={() => goTo("profile")} />
@@ -1814,7 +1787,7 @@ function AppContent() {
         <View style={styles.page}>
           {renderTopBar("Purchaser Profile", () => goTo("pdashboard"))}
           <ScrollView contentContainerStyle={styles.scroll}>
-            <Text style={styles.subtle}>purchaser@stqc.gov.in</Text>
+            <Text style={styles.subtle}>purchaserertls@gmail.com</Text>
             <ProfileRow icon="=" label="Logout" onPress={logout} danger />
           </ScrollView>
         </View>
@@ -1918,7 +1891,7 @@ function AppContent() {
         visible={admDrawerOpen}
         onClose={() => setAdmDrawerOpen(false)}
         title="Administrator"
-        subtitle="admin@stqc.gov.in"
+        subtitle="ertlsadmin@gmail.com"
         rows={[
           { iconName: "home", colorTheme: "green", label: "Admin Home", onPress: () => { setAdmDrawerOpen(false); goTo("adm-home"); } },
           { iconName: "wallet", colorTheme: "amber", label: "Recharge", onPress: () => { setAdmDrawerOpen(false); goTo("adm-recharge"); } },

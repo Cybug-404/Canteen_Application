@@ -28,9 +28,10 @@ export const navTabs = [
 ];
 
 export const CREDENTIALS = {
-  chef: { email: "chef@stqc.gov.in", pass: "chef123" },
-  admin: { email: "admin@stqc.gov.in", pass: "admin123" },
-  purchaser: { email: "purchaser@stqc.gov.in", pass: "purchaser123" },
+  chef: { email: "chefertls@gmail.com", pass: "chef123" },
+  admin: { email: "ertlsadmin@gmail.com", pass: "admin123" },
+  purchaser: { email: "purchaserertls@gmail.com", pass: "purchaser123" },
+  customer: { email: "customerertls@gmail.com", pass: "customer123" },
 };
 
 export const CHEF_NAME = "Chef Rajan";
